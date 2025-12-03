@@ -1,10 +1,37 @@
 const BASE_URL = "http://127.0.0.1:8000";
 
-console.log("auth.js loaded"); 
+console.log("auth.js loaded");
 
 const getValue = (id) => {
   const value = document.getElementById(id).value;
   return value;
+};
+
+// Function to get CSRF token from cookie
+const getCookie = (name) => {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+};
+
+// Function to get CSRF token from form or cookie
+const getCSRFToken = () => {
+  // First try to get from form input
+  const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+  if (csrfInput) {
+    return csrfInput.value;
+  }
+  // Fallback to cookie
+  return getCookie('csrftoken');
 };
 
 const handleRegistration = (event) => {
@@ -33,17 +60,31 @@ const handleRegistration = (event) => {
     ) {
       console.log("Registration payload:", info);
 
+      const csrfToken = getCSRFToken();
+
       fetch(`${BASE_URL}/patient/register/`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          "X-CSRFToken": csrfToken
+        },
         body: JSON.stringify(info),
       })
         .then((res) => res.json())
         .then((data) => {
           console.log("Registration response:", data);
+          if (data.error || data.username || data.email) {
+            // Handle validation errors
+            document.getElementById("error").innerText = JSON.stringify(data);
+          } else {
+            // Success message
+            document.getElementById("error").innerText = "";
+            document.getElementById("success").innerText = data;
+          }
         })
         .catch((err) => {
           console.error("Registration error:", err);
+          document.getElementById("error").innerText = "An error occurred during registration.";
         });
     } else {
       document.getElementById("error").innerText =
@@ -65,9 +106,14 @@ const handleLogin = (event) => {
   console.log("Login input:", username, password);
 
   if (username && password) {
+    const csrfToken = getCSRFToken();
+
     fetch(`${BASE_URL}/patient/login/`, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        "X-CSRFToken": csrfToken
+      },
       body: JSON.stringify({ username, password }),
     })
       .then((res) => res.json())
@@ -77,7 +123,7 @@ const handleLogin = (event) => {
         if (data.token && data.user_id) {
           localStorage.setItem("token", data.token);
           localStorage.setItem("user_id", data.user_id);
-          window.location.href = "index.html";
+          window.location.href = "/index.html";
         } else {
           alert("Login failed. Check username/password.");
         }

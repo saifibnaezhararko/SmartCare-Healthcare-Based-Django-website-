@@ -1,7 +1,7 @@
-from rest_framework.routers import DefaultRouter
+from smart_care.routers import RelativeURLRouter
 from django.urls import path, include
 from . import views
-router = DefaultRouter() # amader router
+router = RelativeURLRouter() # amader router
 
 router.register('list', views.DoctorViewset) # router er antena
 router.register('specialization', views.SpecializationViewset) # router er antena

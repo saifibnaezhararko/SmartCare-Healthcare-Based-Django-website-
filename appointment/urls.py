@@ -1,8 +1,8 @@
 from django.urls import include, path
-from rest_framework import routers
+from smart_care.routers import RelativeURLRouter
 from . import views
 
-router = routers.DefaultRouter() # wifi toiri korlam
+router = RelativeURLRouter() # wifi toiri korlam
 router.register('', views.AppointmentViewSet) # ekta entena toiri korlam
 
 urlpatterns = [

@@ -48,6 +48,11 @@ INSTALLED_APPS = [
     'doctor',
     'patient',
     'service',
+    # New apps
+    'emergency',
+    'blood_bank',
+    'vaccine',
+    'burn_unit',
 ]
 
 MIDDLEWARE = [
@@ -66,7 +71,7 @@ ROOT_URLCONF = 'smart_care.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates', BASE_DIR],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -95,7 +100,15 @@ DATABASES = {
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'URL_FIELD_NAME': None,
 }
+
+# Use X-Forwarded-Host header if behind a proxy (for deployment)
+USE_X_FORWARDED_HOST = True
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -134,16 +147,27 @@ CORS_ALLOW_CREDENTIALS = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
+# Email Configuration
+# For development: Use console backend (emails will be printed to console)
+# For production: Use SMTP backend with real credentials
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Change to 'django.core.mail.backends.smtp.EmailBackend' for production
+
+# Uncomment below for production with real SMTP
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-# EMAIL_HOST_USER = env("EMAIL", default="test@example.com")
+EMAIL_HOST_USER = env("EMAIL", default="test@example.com")
 EMAIL_HOST_PASSWORD = env("EMAIL_PASSWORD", default="dummy-password")

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from rest_framework import viewsets
 from . import models
 from . import serializers
@@ -10,15 +10,21 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view
+from rest_framework import status
 # for sending email
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
-from django.shortcuts import redirect
 
 
 class PatientViewset(viewsets.ModelViewSet):
     queryset = models.Patient.objects.all()
     serializer_class = serializers.PatientSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return serializers.PatientDetailSerializer
+        return serializers.PatientSerializer
 
 class UserRegistrationApiView(APIView):
     serializer_class = serializers.RegistrationSerializer
@@ -49,15 +55,20 @@ def activate(request, uid64, token):
         uid = urlsafe_base64_decode(uid64).decode()
         user = User._default_manager.get(pk=uid)
     except(User.DoesNotExist):
-        user = None 
-    
+        user = None
+
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
         return redirect('login')
     else:
         return redirect('register')
-    
+
+
+def login_page(request):
+    # This renders the login.html template for browser access
+    return render(request, 'login.html')
+
 
 class UserLoginApiView(APIView):
     def post(self, request):
@@ -67,7 +78,7 @@ class UserLoginApiView(APIView):
             password = serializer.validated_data['password']
 
             user = authenticate(username= username, password=password)
-            
+
             if user:
                 token, _ = Token.objects.get_or_create(user=user)
                 print(token)
@@ -80,7 +91,16 @@ class UserLoginApiView(APIView):
 
 class UserLogoutView(APIView):
     def get(self, request):
-        request.user.auth_token.delete()
+        if request.user.is_authenticated:
+            request.user.auth_token.delete()
         logout(request)
         return redirect('login')
-        
+
+@api_view(['GET'])
+def get_patient_by_user(request, user_id):
+    try:
+        patient = models.Patient.objects.get(user__id=user_id)
+        serializer = serializers.PatientDetailSerializer(patient)
+        return Response(serializer.data)
+    except models.Patient.DoesNotExist:
+        return Response({'error': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND)

@@ -180,7 +180,7 @@ const handleAppointment = () => {
     .then((res) => res.json())
     .then((data) => {
       console.log("Appointment response:", data);
-      window.location.href = `pdf.html?doctorId=${param}`;
+      window.location.href = `/pdf.html?doctorId=${param}`;
     })
     .catch((err) => console.error("Appointment error:", err));
 };

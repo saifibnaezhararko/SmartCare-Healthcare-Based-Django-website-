@@ -1,13 +1,15 @@
-from rest_framework.routers import DefaultRouter
+from smart_care.routers import RelativeURLRouter
 from django.urls import path, include
 from . import views
-router = DefaultRouter() # amader router
+router = RelativeURLRouter() # amader router
 
 router.register('list', views.PatientViewset) # router er antena
 urlpatterns = [
     path('', include(router.urls)),
     path('register/', views.UserRegistrationApiView.as_view(), name='register'),
-    path('login/', views.UserLoginApiView.as_view(), name='login'),
+    path('login/', views.login_page, name='patient_login'),  # HTML login page
+    path('api/login/', views.UserLoginApiView.as_view(), name='api_login'),  # API endpoint
     path('logout/', views.UserLogoutView.as_view(), name='logout'),
     path('active/<uid64>/<token>/', views.activate, name = 'activate'),
+    path('by-user/<int:user_id>/', views.get_patient_by_user, name='patient_by_user'),
 ]

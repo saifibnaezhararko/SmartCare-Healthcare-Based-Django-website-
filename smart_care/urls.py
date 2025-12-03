@@ -1,34 +1,63 @@
-"""
-URL configuration for smart_care project.
+# smart_care/urls.py
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from rest_framework.routers import DefaultRouter
-from . views import UserViewSet
-router = DefaultRouter()
-router.register('users', UserViewSet)
+from smart_care.routers import RelativeURLRouter
+from . import views  # smart_care ফোল্ডারের views.py ফাইলকে ইম্পোর্ট করা হলো
+
+# API রাউটার সেটআপ
+router = RelativeURLRouter()
+router.register('users', views.UserViewSet) # এটি User সম্পর্কিত API তৈরি করবে
+
 urlpatterns = [
-    path('', include(router.urls)),
+    # Django Admin
     path('admin/', admin.site.urls),
+
+    # 1. হোমপেজ, লগইন, রেজিস্ট্রেশন ইত্যাদি দেখানোর জন্য URL
+    path('', views.index, name='home'),  # মূল URL (হোমপেজ)
+    path('index.html', views.index, name='home_html'),  # index.html দিয়ে এক্সেস
+    path('login/', views.login, name='login'), # লগইন পেজের URL
+    path('login.html', views.login, name='login_html'), # login.html দিয়ে এক্সেস
+    path('logout/', views.logout, name='logout'), # লগআউট করার URL
+    path('logout.html', views.logout, name='logout_html'), # logout.html দিয়ে এক্সেস
+    path('registration/', views.registration, name='registration'), # রেজিস্ট্রেশন পেজের URL
+    path('registration.html', views.registration, name='registration_html'), # registration.html দিয়ে এক্সেস
+    path('allAppointments.html', views.all_appointments, name='all_appointments'), # সকল অ্যাপয়েন্টমেন্ট
+    path('docDetails.html', views.doc_details, name='doc_details'), # ডাক্তারের বিস্তারিত
+    path('pdf.html', views.pdf_view, name='pdf'), # পিডিএফ ভিউ
+    path('userDetails.html', views.user_details, name='user_details'), # ব্যবহারকারীর বিস্তারিত
+    path('bloodbank.html', views.blood_bank_page, name='blood_bank_page'), # ব্লাড ব্যাংক পেজ
+
+    # 2. অন্যান্য অ্যাপের URL গুলোকে যুক্ত করা
     path('contact_us/', include('contact_us.urls')),
     path('services/', include('service.urls')),
     path('patient/', include('patient.urls')),
     path('doctor/', include('doctor.urls')),
     path('appointment/', include('appointment.urls')),
+
+    # Blood Bank HTML page
+    path('blood_bank/', views.blood_bank_page, name='blood_bank'),
+
+    # Vaccine HTML page
+    path('vaccination/', views.vaccine_page, name='vaccination'),
+    
+    # Contact Us HTML page
+    path('contact/', views.contact_us_page, name='contact_us_page'),
+
+    # Doctors page
+    path('doctors/', views.doctors_page, name='doctors_page'),
+
+    # New app URLs
+    path('emergency/', include('emergency.urls')),
+    path('blood_bank/api/', include('blood_bank.urls')),
+    path('vaccine/', include('vaccine.urls')),
+    path('burn_unit/', include('burn_unit.urls')),
+
+    # 3. API গুলোকে '/api/' লিঙ্কের অধীনে রাখা হয়েছে
+    path('api/', include(router.urls)),
 ]
+
+# মিডিয়া ফাইল (যেমন ছবি) দেখানোর জন্য এই লাইনটি জরুরি
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
