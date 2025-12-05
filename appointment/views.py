@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from rest_framework import viewsets
+from rest_framework.permissions import AllowAny
 from . import models
 from . import serializers
 # Create your views here.
 class AppointmentViewSet(viewsets.ModelViewSet):
     queryset = models.Appointment.objects.all()
     serializer_class =  serializers.AppointmentSerializer
+    permission_classes = [AllowAny]
     
     # custom query kortechi
     def get_queryset(self):

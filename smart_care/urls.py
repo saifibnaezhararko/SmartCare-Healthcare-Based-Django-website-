@@ -49,6 +49,12 @@ urlpatterns = [
 
     # Doctors page
     path('doctors/', views.doctors_page, name='doctors_page'),
+    
+    # Services page
+    path('services-page/', views.services_page, name='services_page'),
+
+    # Book Appointment page
+    path('book-appointment/', views.book_appointment_page, name='book_appointment'),
 
     # Footer pages
     path('about/', views.about_page, name='about_page'),

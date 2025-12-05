@@ -230,9 +230,9 @@ const loadPatientDetails = () => {
 
           <!-- Edit Profile Button -->
           <div class="text-center mt-4">
-            <button class="btn btn-primary btn-lg" onclick="alert('Edit profile functionality coming soon!')">
+            <a href="/patient/edit-profile/" class="btn btn-primary btn-lg">
               <i class="fas fa-edit"></i> Edit Profile
-            </button>
+            </a>
           </div>
         </div>
       `;

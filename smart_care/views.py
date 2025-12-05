@@ -2,6 +2,7 @@
 
 from django.shortcuts import render
 from django.contrib.auth.models import User
+from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import viewsets
 from . import serializers
 
@@ -98,6 +99,11 @@ def doctors_page(request):
     # Doctors পেজ দেখানোর জন্য
     return render(request, 'doctors.html')
 
+@ensure_csrf_cookie
+def book_appointment_page(request):
+    # Book Appointment পেজ দেখানোর জন্য
+    return render(request, 'book_appointment.html')
+
 def about_page(request):
     # About পেজ দেখানোর জন্য
     return render(request, 'about.html')
@@ -147,3 +153,9 @@ def forgot_password_page(request):
         messages.success(request, 'Password reset link has been sent to your email!')
         return render(request, 'forgot_password.html')
     return render(request, 'forgot_password.html')
+
+def services_page(request):
+    # Services পেজ দেখানোর জন্য
+    from service.models import Service
+    services = Service.objects.all()
+    return render(request, 'services.html', {'services': services})

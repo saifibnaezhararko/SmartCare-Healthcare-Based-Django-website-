@@ -104,3 +104,57 @@ def get_patient_by_user(request, user_id):
         return Response(serializer.data)
     except models.Patient.DoesNotExist:
         return Response({'error': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND)
+
+def edit_profile_page(request):
+    return render(request, 'editProfile.html')
+
+@api_view(['PUT', 'PATCH'])
+def update_patient_profile(request, user_id):
+    try:
+        patient = models.Patient.objects.get(user__id=user_id)
+        user = patient.user
+
+        # Update User model fields
+        if 'first_name' in request.data:
+            user.first_name = request.data['first_name']
+        if 'last_name' in request.data:
+            user.last_name = request.data['last_name']
+        if 'email' in request.data:
+            user.email = request.data['email']
+        user.save()
+
+        # Update Patient model fields
+        patient_fields = [
+            'mobile_no', 'date_of_birth', 'gender', 'blood_group', 'address',
+            'emergency_contact_name', 'emergency_contact_phone', 'allergies',
+            'chronic_diseases', 'current_medications', 'past_surgeries',
+            'family_medical_history', 'height', 'weight'
+        ]
+
+        for field in patient_fields:
+            if field in request.data:
+                value = request.data[field]
+                # Handle empty strings for optional fields
+                if value == '' and field in ['height', 'weight', 'date_of_birth']:
+                    value = None
+                elif value == '' and field in ['gender', 'blood_group']:
+                    if field == 'blood_group':
+                        value = 'Unknown'
+                    else:
+                        value = None
+                setattr(patient, field, value)
+
+        patient.save()
+
+        # Return updated patient data
+        serializer = serializers.PatientDetailSerializer(patient)
+        return Response({
+            'message': 'Profile updated successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+
+    except models.Patient.DoesNotExist:
+        return Response({'error': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        print(f"Error updating patient profile: {str(e)}")  # Add logging
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
