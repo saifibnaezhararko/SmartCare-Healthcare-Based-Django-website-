@@ -92,17 +92,28 @@ li {
     padding: 2rem;
 }
 
+.banner-carousel-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--border-radius);
+}
+
 .banner {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-lg);
     padding: 3rem;
     min-height: 450px;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: space-between;
     overflow: hidden;
     position: relative;
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+.banner.active {
+    display: flex;
 }
 
 .banner::before {
@@ -134,6 +145,7 @@ li {
     margin-bottom: 1.5rem;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
     line-height: 1.2;
+    animation: slideInLeft 0.8s ease-out;
 }
 
 .banner-left p {
@@ -141,6 +153,7 @@ li {
     opacity: 0.95;
     max-width: 600px;
     margin: 0 auto;
+    animation: slideInLeft 1s ease-out 0.2s both;
 }
 
 .banner-img {
@@ -155,12 +168,202 @@ li {
     width: 350px;
     max-width: 100%;
     filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
-    animation: float 6s ease-in-out infinite;
+    animation: float 6s ease-in-out infinite, slideInRight 1s ease-out;
+    transition: transform 0.3s ease;
+}
+
+.bn-img:hover {
+    transform: scale(1.05);
 }
 
 @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-20px); }
+}
+
+/* Banner Navigation Arrows */
+.banner-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.banner-arrow:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.banner-arrow-left {
+    left: -25px;
+}
+
+.banner-arrow-right {
+    right: -25px;
+}
+
+/* Banner Play/Pause Button */
+.banner-play-pause {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 100;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.banner-play-pause:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.banner-play-pause i {
+    font-size: 1rem;
+}
+
+/* Banner Pause State */
+.banner-carousel-wrapper:hover .banner-play-pause {
+    opacity: 1;
+}
+
+/* Banner Dots */
+.banner-dots {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.75rem;
+    z-index: 10;
+}
+
+.banner-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid white;
+}
+
+.banner-dot:hover {
+    background: white;
+    transform: scale(1.2);
+}
+
+.banner-dot.active {
+    background: white;
+    width: 40px;
+    border-radius: 7px;
+}
+
+/* Banner Reviews Section */
+.banner-reviews-section {
+    width: 100%;
+    color: white;
+}
+
+.banner-reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin: 0 auto;
+    max-width: 1100px;
+}
+
+.banner-review-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    animation: zoomIn 0.6s ease-out;
+}
+
+.banner-review-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.banner-review-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.banner-review-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.banner-review-card:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+.banner-review-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid white;
+    margin: 0 auto 1rem;
+    object-fit: cover;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.banner-review-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.banner-review-stars {
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.banner-review-stars i {
+    color: #ffc107;
+    font-size: 1rem;
+}
+
+.banner-review-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.95);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
 }
 
 /* Service Section Styles */
@@ -572,25 +775,95 @@ button:active {
     padding: 2rem;
     text-align: center;
     transition: var(--transition);
-    height: 300px;
+    min-height: 380px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.review-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.review-card:hover::before {
+    transform: scaleX(1);
 }
 
 .review-card:hover {
-    transform: scale(1.05);
+    transform: translateY(-5px);
     box-shadow: var(--shadow-lg);
 }
 
-.review-card img {
-    width: 70px;
-    height: 70px;
+.review-image-wrapper {
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid var(--primary-color);
+    overflow: hidden;
+    border: 4px solid var(--primary-color);
     margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: var(--transition);
+}
+
+.review-card:hover .review-image-wrapper {
+    transform: scale(1.1);
+    border-color: var(--secondary-color);
+}
+
+.review-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.reviewer-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--dark-text);
+    margin-bottom: 0.75rem;
+}
+
+.star-rating {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+    justify-content: center;
+}
+
+.star-rating i {
+    color: #ffc107;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease;
+}
+
+.star-rating i.far {
+    color: #ddd;
+}
+
+.review-card:hover .star-rating i {
+    transform: scale(1.2);
+}
+
+.review-text {
+    color: var(--light-text);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    text-align: center;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
 }
 
 /* Footer Styles */
@@ -614,12 +887,21 @@ footer li {
     margin-bottom: 0.5rem;
     cursor: pointer;
     transition: var(--transition);
-    color: rgba(255, 255, 255, 0.9);
+    color: #000000;
+}
+
+footer li a {
+    color: #000000;
+    text-decoration: none;
 }
 
 footer li:hover {
-    color: white;
+    color: #333333;
     transform: translateX(5px);
+}
+
+footer li a:hover {
+    color: #333333;
 }
 
 .icons {
@@ -817,6 +1099,24 @@ footer li:hover {
         margin-top: 2rem;
     }
 
+    .banner-reviews-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .banner-arrow-left {
+        left: 10px;
+    }
+
+    .banner-arrow-right {
+        right: 10px;
+    }
+
+    .banner-arrow {
+        width: 40px;
+        height: 40px;
+    }
+
     .doc-details-container,
     .user-all {
         flex-direction: column;
@@ -832,6 +1132,12 @@ footer li:hover {
     }
 }
 
+@media (max-width: 991px) and (min-width: 769px) {
+    .banner-reviews-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 /* Animations */
 @keyframes fadeIn {
     from {
@@ -841,6 +1147,56 @@ footer li:hover {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
     }
 }
 
@@ -1201,4 +1557,133 @@ footer li:hover {
 
 .service-modal-content::-webkit-scrollbar-thumb:hover {
     background: var(--primary-color);
+}
+
+/* Swiffy Slider Navigation Arrows - Increased Opacity */
+.swiffy-slider .slider-nav {
+    opacity: 0.9 !important;
+    background: var(--primary-color) !important;
+    transition: all 0.3s ease !important;
+}
+
+.swiffy-slider .slider-nav:hover {
+    opacity: 1 !important;
+    background: var(--secondary-color) !important;
+    transform: scale(1.1) !important;
+}
+
+/* Enhanced Doctor Details Page Styles */
+.doctor-info {
+    line-height: 1.8;
+}
+
+.doctor-info h2 {
+    font-weight: 700;
+    color: var(--dark-text);
+    margin-bottom: 1.5rem;
+}
+
+.doctor-info p {
+    font-size: 1.05rem;
+    color: var(--light-text);
+}
+
+.doctor-info strong {
+    color: var(--dark-text);
+    font-weight: 600;
+}
+
+.badge {
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    transition: var(--transition);
+}
+
+.badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.timeline {
+    position: relative;
+    padding-left: 0;
+}
+
+.timeline .mb-4 {
+    position: relative;
+    padding-left: 30px;
+    border-left: 3px solid var(--primary-color);
+    margin-left: 15px;
+}
+
+.timeline .mb-4::before {
+    content: '';
+    position: absolute;
+    left: -9px;
+    top: 0;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px var(--primary-color);
+}
+
+.card {
+    transition: var(--transition);
+}
+
+.card:hover {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.bg-gradient {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+}
+
+/* Doctor Profile Section Animation */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#doctor-profile-section > div {
+    animation: slideInUp 0.6s ease-out;
+}
+
+#doctor-profile-section > div:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+#doctor-profile-section > div:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+#doctor-profile-section > div:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+#doctor-profile-section > div:nth-child(5) {
+    animation-delay: 0.4s;
+}
+
+/* Responsive Improvements for Doctor Details */
+@media (max-width: 768px) {
+    .doc-details-container {
+        padding: 2rem 1.5rem;
+    }
+
+    .doctor-info h2 {
+        font-size: 1.75rem;
+    }
+
+    .timeline .mb-4 {
+        padding-left: 20px;
+    }
 }

@@ -25,7 +25,8 @@ urlpatterns = [
     path('registration/', views.registration, name='registration'), # রেজিস্ট্রেশন পেজের URL
     path('registration.html', views.registration, name='registration_html'), # registration.html দিয়ে এক্সেস
     path('allAppointments.html', views.all_appointments, name='all_appointments'), # সকল অ্যাপয়েন্টমেন্ট
-    path('docDetails.html', views.doc_details, name='doc_details'), # ডাক্তারের বিস্তারিত
+    path('docDetails.html', views.doc_details, name='doc_details'), # ডাক্তারের বিস্তারিত (old static version)
+    path('doctor/<int:doctor_id>/', views.doc_details_dynamic, name='doc_details_dynamic'), # ডাক্তারের বিস্তারিত (dynamic)
     path('pdf.html', views.pdf_view, name='pdf'), # পিডিএফ ভিউ
     path('userDetails.html', views.user_details, name='user_details'), # ব্যবহারকারীর বিস্তারিত
     path('bloodbank.html', views.blood_bank_page, name='blood_bank_page'), # ব্লাড ব্যাংক পেজ
@@ -48,6 +49,18 @@ urlpatterns = [
 
     # Doctors page
     path('doctors/', views.doctors_page, name='doctors_page'),
+
+    # Footer pages
+    path('about/', views.about_page, name='about_page'),
+    path('careers/', views.careers_page, name='careers_page'),
+    path('careers/apply/', views.careers_apply_page, name='careers_apply_page'),
+    path('blog/', views.blog_page, name='blog_page'),
+    path('blog/<int:blog_id>/', views.blog_detail_page, name='blog_detail_page'),
+    path('health-tips/', views.health_tips_page, name='health_tips_page'),
+    path('faq/', views.faq_page, name='faq_page'),
+    path('terms/', views.terms_page, name='terms_page'),
+    path('privacy/', views.privacy_page, name='privacy_page'),
+    path('forgot-password/', views.forgot_password_page, name='forgot_password_page'),
 
     # New app URLs
     path('emergency/', include('emergency.urls')),

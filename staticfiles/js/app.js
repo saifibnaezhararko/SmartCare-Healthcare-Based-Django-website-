@@ -365,7 +365,7 @@ const displyDoctors = (doctors) => {
           <div class="doctor-info mb-3">
             <p class="mb-1"><i class="fas fa-hospital text-primary"></i> ${doctor?.designation[0] || 'Specialist'}</p>
           </div>
-          <button class="btn btn-primary btn-sm w-100" onclick="window.location.href='docDetails.html?doctorId=${doctor.id}'">
+          <button class="btn btn-primary btn-sm w-100" onclick="window.location.href='/docDetails.html?doctorId=${doctor.id}'">
             <i class="fas fa-calendar-check"></i> View Details
           </button>
         </div>

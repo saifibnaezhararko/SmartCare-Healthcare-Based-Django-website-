@@ -39,19 +39,20 @@
 
     <!-- Doctor Details Section -->
     <div id="doc-details" class="container mt-5">
-        <!-- Doctor details will be loaded here dynamically -->
+        <!-- Loading state -->
         <div class="text-center py-5">
-            <div class="spinner-border text-primary" role="status">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
                 <span class="visually-hidden">Loading...</span>
             </div>
-            <p class="mt-3 text-muted">Loading doctor details...</p>
+            <h4 class="mt-3 text-muted">Loading doctor details...</h4>
         </div>
+        <!-- Doctor details will be loaded here dynamically by docDetails.js -->
     </div>
 
     <!-- Reviews Section -->
     <div class="review-container p-5 mt-5 w-75 m-auto">
         <h1 class="title">
-            <i class="fas fa-star"></i> Client Reviews
+            <i class="fas fa-star"></i> Patient Reviews
         </h1>
         <p class="description text-center w-50 m-auto">
             See what patients are saying about this doctor's expertise and care quality.
@@ -61,13 +62,14 @@
                         slider-nav-round slider-nav-visible slider-indicators-outside
                         slider-indicators-round slider-indicators-dark slider-nav-animation
                         slider-nav-animation-fadein slider-item-first-visible">
-                <ul id="doc-details-review" class="slider-container py-4"></ul>
+                <ul id="doc-details-review" class="slider-container py-4">
+                    <!-- Reviews will be loaded here dynamically by docDetails.js -->
+                    <li class="text-center text-muted py-4">Loading reviews...</li>
+                </ul>
                 <button type="button" class="slider-nav" aria-label="Go left"></button>
                 <button type="button" class="slider-nav slider-nav-next" aria-label="Go right"></button>
                 <div class="slider-indicators">
                     <button class="active" aria-label="Go to slide"></button>
-                    <button aria-label="Go to slide"></button>
-                    <button aria-label="Go to slide"></button>
                     <button aria-label="Go to slide"></button>
                     <button aria-label="Go to slide"></button>
                 </div>
@@ -146,27 +148,28 @@
                 <p><small>Copyright © SmartCare. All Rights Reserved</small></p>
                 <h5 class="mt-4">Follow Us</h5>
                 <div class="icons">
-                    <a href="#"><i class="fab fa-linkedin fa-2x"></i></a>
-                    <a href="#"><i class="fab fa-youtube fa-2x"></i></a>
-                    <a href="#"><i class="fab fa-facebook fa-2x"></i></a>
+                    <a href="https://www.linkedin.com" target="_blank"><i class="fab fa-linkedin fa-2x"></i></a>
+                    <a href="https://www.youtube.com" target="_blank"><i class="fab fa-youtube fa-2x"></i></a>
+                    <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook fa-2x"></i></a>
+                    <a href="https://www.twitter.com" target="_blank"><i class="fab fa-twitter fa-2x"></i></a>
                 </div>
             </div>
             <div class="col-md-3">
                 <h5>Company</h5>
                 <ul>
-                    <li><a href="#">About</a></li>
-                    <li><a href="#">Contact Us</a></li>
-                    <li><a href="#">Careers</a></li>
-                    <li><a href="#">Blog</a></li>
+                    <li><a href="{% url 'about_page' %}">About</a></li>
+                    <li><a href="{% url 'contact_us_page' %}">Contact Us</a></li>
+                    <li><a href="{% url 'careers_page' %}">Careers</a></li>
+                    <li><a href="{% url 'blog_page' %}">Blog</a></li>
                 </ul>
             </div>
             <div class="col-md-3">
                 <h5>Resources</h5>
                 <ul>
-                    <li><a href="#">Health Tips</a></li>
-                    <li><a href="#">Find a Doctor</a></li>
-                    <li><a href="#">Appointments</a></li>
-                    <li><a href="#">FAQ</a></li>
+                    <li><a href="{% url 'health_tips_page' %}">Health Tips</a></li>
+                    <li><a href="{% url 'doctors_page' %}">Find a Doctor</a></li>
+                    <li><a href="{% url 'all_appointments' %}">Appointments</a></li>
+                    <li><a href="{% url 'faq_page' %}">FAQ</a></li>
                 </ul>
             </div>
         </div>

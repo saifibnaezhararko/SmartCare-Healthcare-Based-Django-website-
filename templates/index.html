@@ -33,8 +33,11 @@
                     <li class="menu"><a href="{% url 'home' %}">Home</a></li>
                     <li class="menu"><a href="#services">Services</a></li>
                     <li class="menu"><a href="#contact">Contact us</a></li>
+                    {% if not user.is_authenticated %}
                     <li class="menu"><a href="{% url 'login' %}">Login</a></li>
+                    {% endif %}
                 </ul>
+                {% if user.is_authenticated %}
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button"
                             id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
@@ -59,23 +62,118 @@
                         </li>
                     </ul>
                 </div>
+                {% endif %}
             </div>
         </nav>
 
-        <!-- Banner Section -->
+        <!-- Banner Section with Carousel -->
         <div class="banner-container">
-            <div class="banner">
-                <div class="banner-left">
-                    <h1>Providing Quality<br />Healthcare</h1>
-                    <p class="w-75 m-auto">
-                        Experience exceptional medical care with our team of dedicated healthcare
-                        professionals. We're committed to your health and wellbeing with modern
-                        facilities and comprehensive medical services.
-                    </p>
+            <div class="banner-carousel-wrapper">
+                <!-- Banner Slide 1 - Main Healthcare -->
+                <div class="banner active">
+                    <div class="banner-left">
+                        <h1>Providing Quality<br />Healthcare</h1>
+                        <p class="w-75 m-auto">
+                            Experience exceptional medical care with our team of dedicated healthcare
+                            professionals. We're committed to your health and wellbeing with modern
+                            facilities and comprehensive medical services.
+                        </p>
+                    </div>
+                    <div class="banner-img">
+                        <img class="bn-img" src="{% static 'images/doc.png' %}" alt="Doctor" />
+                    </div>
                 </div>
-                <div class="banner-img">
-                    <img class="bn-img" src="{% static 'images/doc.png' %}" alt="Doctor" />
+
+                <!-- Banner Slide 3 - Cardiology Services -->
+                <div class="banner" data-specialty="cardiology">
+                    <div class="banner-left">
+                        <h1>Expert Cardiology<br />Care</h1>
+                        <p class="w-75 m-auto">
+                            Advanced heart care with experienced cardiologists, state-of-the-art ECG,
+                            echocardiography, and cardiac monitoring. Your heart health is our priority
+                            with comprehensive cardiovascular treatment.
+                        </p>
+                    </div>
+                    <div class="banner-img">
+                        <img class="bn-img" src="https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg" alt="Cardiology Specialist" onerror="this.src='{% static 'images/doc.png' %}'" />
+                    </div>
                 </div>
+
+                <!-- Banner Slide 4 - Pediatric Care -->
+                <div class="banner" data-specialty="pediatrics">
+                    <div class="banner-left">
+                        <h1>Caring for Your<br />Little Ones</h1>
+                        <p class="w-75 m-auto">
+                            Specialized pediatric healthcare for infants, children, and adolescents.
+                            Our child-friendly environment and experienced pediatricians ensure the
+                            best care with growth monitoring and vaccination programs.
+                        </p>
+                    </div>
+                    <div class="banner-img">
+                        <img class="bn-img" src="https://img.freepik.com/free-photo/pleased-young-female-doctor-wearing-medical-robe-stethoscope-around-neck-standing-with-closed-posture_409827-254.jpg" alt="Pediatric Specialist" onerror="this.src='{% static 'images/doc.png' %}'" />
+                    </div>
+                </div>
+
+                <!-- Banner Slide 5 - Surgery & OT -->
+                <div class="banner" data-specialty="surgery">
+                    <div class="banner-left">
+                        <h1>Advanced Surgical<br />Excellence</h1>
+                        <p class="w-75 m-auto">
+                            Modern operation theaters with cutting-edge technology. Our skilled surgeons
+                            specialize in general surgery, laparoscopic procedures, and minimally invasive
+                            techniques for faster recovery.
+                        </p>
+                    </div>
+                    <div class="banner-img">
+                        <img class="bn-img" src="https://img.freepik.com/free-photo/front-view-male-doctor_23-2148847716.jpg" alt="Surgical Specialist" onerror="this.src='{% static 'images/doc.png' %}'" />
+                    </div>
+                </div>
+
+                <!-- Banner Slide 6 - Emergency Services -->
+                <div class="banner" data-specialty="emergency">
+                    <div class="banner-left">
+                        <h1>24/7 Emergency<br />Services</h1>
+                        <p class="w-75 m-auto">
+                            Round-the-clock emergency medical services with fully equipped ambulances,
+                            trauma care units, and experienced emergency physicians ready to handle
+                            all medical emergencies.
+                        </p>
+                    </div>
+                    <div class="banner-img">
+                        <img class="bn-img" src="https://img.freepik.com/free-photo/medium-shot-doctor-with-stethoscope_23-2148816188.jpg" alt="Emergency Services" onerror="this.src='{% static 'images/doc.png' %}'" />
+                    </div>
+                </div>
+
+                <!-- Banner Slide 7 - Maternity Care -->
+                <div class="banner" data-specialty="maternity">
+                    <div class="banner-left">
+                        <h1>Comprehensive<br />Maternity Care</h1>
+                        <p class="w-75 m-auto">
+                            Complete prenatal and postnatal care with experienced obstetricians.
+                            Safe delivery services, NICU facilities, and dedicated support throughout
+                            your pregnancy journey.
+                        </p>
+                    </div>
+                    <div class="banner-img">
+                        <img class="bn-img" src="https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg" alt="Maternity Specialist" onerror="this.src='{% static 'images/doc.png' %}'" />
+                    </div>
+                </div>
+
+                <!-- Banner Navigation Arrows -->
+                <button class="banner-arrow banner-arrow-left" id="prevBanner" aria-label="Previous banner">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="banner-arrow banner-arrow-right" id="nextBanner" aria-label="Next banner">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+
+                <!-- Play/Pause Control -->
+                <button class="banner-play-pause" id="playPauseBanner" aria-label="Pause carousel">
+                    <i class="fas fa-pause"></i>
+                </button>
+
+                <!-- Banner Dots -->
+                <div class="banner-dots" id="bannerDots"></div>
             </div>
         </div>
     </header>
@@ -280,28 +378,28 @@
                 <p><small>Copyright © SmartCare. All Rights Reserved</small></p>
                 <h5 class="mt-4">Follow Us</h5>
                 <div class="icons">
-                    <a href="#"><i class="fab fa-linkedin fa-2x"></i></a>
-                    <a href="#"><i class="fab fa-youtube fa-2x"></i></a>
-                    <a href="#"><i class="fab fa-facebook fa-2x"></i></a>
-                    <a href="#"><i class="fab fa-twitter fa-2x"></i></a>
+                    <a href="https://www.linkedin.com" target="_blank"><i class="fab fa-linkedin fa-2x"></i></a>
+                    <a href="https://www.youtube.com" target="_blank"><i class="fab fa-youtube fa-2x"></i></a>
+                    <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook fa-2x"></i></a>
+                    <a href="https://www.twitter.com" target="_blank"><i class="fab fa-twitter fa-2x"></i></a>
                 </div>
             </div>
             <div class="col-md-3">
                 <h5>Company</h5>
                 <ul>
-                    <li><a href="#">About</a></li>
-                    <li><a href="#">Contact Us</a></li>
-                    <li><a href="#">Careers</a></li>
-                    <li><a href="#">Blog</a></li>
+                    <li><a href="{% url 'about_page' %}">About</a></li>
+                    <li><a href="{% url 'contact_us_page' %}">Contact Us</a></li>
+                    <li><a href="{% url 'careers_page' %}">Careers</a></li>
+                    <li><a href="{% url 'blog_page' %}">Blog</a></li>
                 </ul>
             </div>
             <div class="col-md-3">
                 <h5>Resources</h5>
                 <ul>
-                    <li><a href="#">Health Tips</a></li>
-                    <li><a href="#">Find a Doctor</a></li>
-                    <li><a href="#">Appointments</a></li>
-                    <li><a href="#">FAQ</a></li>
+                    <li><a href="{% url 'health_tips_page' %}">Health Tips</a></li>
+                    <li><a href="{% url 'doctors_page' %}">Find a Doctor</a></li>
+                    <li><a href="{% url 'all_appointments' %}">Appointments</a></li>
+                    <li><a href="{% url 'faq_page' %}">FAQ</a></li>
                 </ul>
             </div>
         </div>

@@ -359,27 +359,28 @@
                 <p><small>Copyright © SmartCare. All Rights Reserved</small></p>
                 <h5 class="mt-4">Follow Us</h5>
                 <div class="icons">
-                    <a href="#"><i class="fab fa-linkedin fa-2x"></i></a>
-                    <a href="#"><i class="fab fa-youtube fa-2x"></i></a>
-                    <a href="#"><i class="fab fa-facebook fa-2x"></i></a>
+                    <a href="https://www.linkedin.com" target="_blank"><i class="fab fa-linkedin fa-2x"></i></a>
+                    <a href="https://www.youtube.com" target="_blank"><i class="fab fa-youtube fa-2x"></i></a>
+                    <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook fa-2x"></i></a>
+                    <a href="https://www.twitter.com" target="_blank"><i class="fab fa-twitter fa-2x"></i></a>
                 </div>
             </div>
             <div class="col-md-3">
                 <h5>Company</h5>
                 <ul>
-                    <li><a href="#">About</a></li>
-                    <li><a href="#">Contact Us</a></li>
-                    <li><a href="#">Careers</a></li>
-                    <li><a href="#">Blog</a></li>
+                    <li><a href="{% url 'about_page' %}">About</a></li>
+                    <li><a href="{% url 'contact_us_page' %}">Contact Us</a></li>
+                    <li><a href="{% url 'careers_page' %}">Careers</a></li>
+                    <li><a href="{% url 'blog_page' %}">Blog</a></li>
                 </ul>
             </div>
             <div class="col-md-3">
                 <h5>Resources</h5>
                 <ul>
-                    <li><a href="#">Health Tips</a></li>
-                    <li><a href="#">Find a Doctor</a></li>
-                    <li><a href="#">Appointments</a></li>
-                    <li><a href="#">FAQ</a></li>
+                    <li><a href="{% url 'health_tips_page' %}">Health Tips</a></li>
+                    <li><a href="{% url 'doctors_page' %}">Find a Doctor</a></li>
+                    <li><a href="{% url 'all_appointments' %}">Appointments</a></li>
+                    <li><a href="{% url 'faq_page' %}">FAQ</a></li>
                 </ul>
             </div>
         </div>

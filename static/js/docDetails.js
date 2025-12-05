@@ -12,6 +12,7 @@ const getDoctorIdFromUrl = () => {
 const getparams = () => {
   const param = getDoctorIdFromUrl();
   if (!param) {
+    showError("No doctor ID provided in URL");
     return;
   }
 
@@ -30,10 +31,13 @@ const getparams = () => {
       return res.json();
     })
     .then((data) => displayDetails(data))
-    .catch((err) => console.error("Doctor detail fetch error:", err));
+    .catch((err) => {
+      console.error("Doctor detail fetch error:", err);
+      showError(`Failed to load doctor details. ${err.message}`);
+    });
 
   // doctor reviews
-  fetch(`${BASE_URL}/doctor/review/?doctor_id=${param}`)
+  fetch(`${BASE_URL}/doctor/reviews/?doctor_id=${param}`)
     .then((res) => {
       if (!res.ok) {
         console.error("Review HTTP error:", res.status);
@@ -45,28 +49,69 @@ const getparams = () => {
       return res.json();
     })
     .then((data) => doctorReview(data))
-    .catch((err) => console.error("Review fetch error:", err));
+    .catch((err) => {
+      console.error("Review fetch error:", err);
+      // Show a message in the review section instead of hiding it
+      const reviewContainer = document.getElementById("doc-details-review");
+      if (reviewContainer) {
+        reviewContainer.innerHTML = '<li class="text-center text-muted">No reviews available</li>';
+      }
+    });
+};
+
+const showError = (message) => {
+  const parent = document.getElementById("doc-details");
+  if (parent) {
+    parent.innerHTML = `
+      <div class="alert alert-danger text-center" role="alert">
+        <i class="fas fa-exclamation-triangle"></i> ${message}
+        <br><br>
+        <a href="index.html" class="btn btn-primary">
+          <i class="fas fa-home"></i> Go Back to Home
+        </a>
+      </div>
+    `;
+  }
 };
 
 const doctorReview = (reviews) => {
+  const parent = document.getElementById("doc-details-review");
+  if (!parent) return;
+
   if (!Array.isArray(reviews)) {
     console.error("doctorReview expected array, got:", reviews);
+    parent.innerHTML = '<li class="text-center text-muted">No reviews available</li>';
     return;
   }
 
-  const parent = document.getElementById("doc-details-review");
   parent.innerHTML = "";
 
+  if (reviews.length === 0) {
+    parent.innerHTML = '<li class="text-center text-muted py-4">No reviews yet for this doctor</li>';
+    return;
+  }
+
   reviews.forEach((review) => {
-    const div = document.createElement("div");
-    div.classList.add("review-card");
-    div.innerHTML = `
-      <img src="./Images/girl.png" alt="" />
-      <h4>${review.reviewer}</h4>
-      <p>${(review.body || "").slice(0, 100)}</p>
-      <h6>${review.rating}</h6>
+    const li = document.createElement("li");
+
+    // Generate star rating using function from app.js
+    const stars = typeof generateStarRating === 'function'
+      ? generateStarRating(review.rating || 5)
+      : '★★★★★'; // Fallback if function not available
+
+    li.innerHTML = `
+      <div class="review-card">
+        <div class="review-image-wrapper">
+          <img src="https://i.pravatar.cc/150?u=${review.reviewer}" alt="${review.reviewer}" onerror="this.src='https://i.pravatar.cc/150?img=68'" />
+        </div>
+        <h4 class="reviewer-name">${review.reviewer}</h4>
+        <div class="star-rating">
+          ${stars}
+        </div>
+        <p class="review-text">${review.body || "No comment provided"}</p>
+      </div>
     `;
-    parent.appendChild(div);
+    parent.appendChild(li);
   });
 };
 
@@ -74,44 +119,61 @@ const displayDetails = (doctor) => {
   console.log("Doctor detail:", doctor);
 
   const parent = document.getElementById("doc-details");
-  parent.innerHTML = ""; 
+  if (!parent) {
+    console.error("doc-details container not found");
+    return;
+  }
+
+  parent.innerHTML = "";
 
   const div = document.createElement("div");
-  div.classList.add("doc-details-container");
+  div.classList.add("doc-details-container", "row", "align-items-center", "g-4");
 
-  const specializationHtml = Array.isArray(doctor.specialization)
-    ? doctor.specialization
-        .map((item) => `<button class="doc-detail-btn">${item}</button>`)
-        .join("")
+  const specializationHtml = Array.isArray(doctor.specialization) && doctor.specialization.length > 0
+    ? `<div class="specializations mb-3">
+         ${doctor.specialization.map((item) => `<span class="badge bg-primary me-2 mb-2">${item}</span>`).join("")}
+       </div>`
     : "";
 
-  const designationHtml = Array.isArray(doctor.designation)
-    ? doctor.designation.map((item) => `<h4>${item}</h4>`).join("")
+  const designationHtml = Array.isArray(doctor.designation) && doctor.designation.length > 0
+    ? `<p class="text-muted mb-3"><i class="fas fa-user-md"></i> ${doctor.designation.join(", ")}</p>`
     : "";
 
   div.innerHTML = `
-    <div class="doctor-img">
-      <img src="${doctor.image}" alt="" />
+    <div class="col-md-4 text-center">
+      <div class="doctor-img-wrapper">
+        <img src="${doctor.image || 'https://via.placeholder.com/300x300?text=No+Image'}"
+             alt="${doctor.full_name || 'Doctor'}"
+             class="img-fluid rounded shadow"
+             onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'" />
+      </div>
     </div>
-    <div class="doc-info">
-      <h1>${doctor.full_name}</h1>
-      ${specializationHtml}
-      ${designationHtml}
+    <div class="col-md-8">
+      <div class="doc-info">
+        <h1 class="mb-3">${doctor.full_name || 'Doctor Name Not Available'}</h1>
+        ${designationHtml}
+        ${specializationHtml}
 
-      <p class="w-50">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Et quibusdam
-        quis excepturi tempore. Eius, qui!
-      </p>
+        <div class="doctor-description mb-4">
+          <h5><i class="fas fa-info-circle"></i> About</h5>
+          <p>
+            ${doctor.description || 'Professional healthcare provider with expertise in various medical fields. Dedicated to providing quality care and treatment to all patients.'}
+          </p>
+        </div>
 
-      <h4>Fees: ${doctor.fee} BDT</h4>
-      <button
-        type="button"
-        class="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#exampleModal"
-      >
-        Take Appointment
-      </button>
+        <div class="doctor-fees mb-4">
+          <h4><i class="fas fa-money-bill-wave"></i> Consultation Fee: <span class="text-primary">${doctor.fee || 'N/A'} BDT</span></h4>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-primary btn-lg"
+          data-bs-toggle="modal"
+          data-bs-target="#exampleModal"
+        >
+          <i class="fas fa-calendar-plus"></i> Book Appointment
+        </button>
+      </div>
     </div>
   `;
   parent.appendChild(div);
@@ -123,7 +185,7 @@ const loadTime = (id) => {
     return;
   }
 
-  fetch(`${BASE_URL}/doctor/availabletime/?doctor_id=${id}`)
+  fetch(`${BASE_URL}/doctor/available_time/?doctor_id=${id}`)
     .then((res) => {
       if (!res.ok) {
         console.error("Available time HTTP error:", res.status);
@@ -136,7 +198,22 @@ const loadTime = (id) => {
     })
     .then((data) => {
       const parent = document.getElementById("time-container");
-      parent.innerHTML = ""; 
+      if (!parent) {
+        console.error("time-container not found");
+        return;
+      }
+
+      parent.innerHTML = '<option value="" selected>Select available time</option>';
+
+      if (!Array.isArray(data) || data.length === 0) {
+        const option = document.createElement("option");
+        option.value = "";
+        option.innerText = "No available times";
+        option.disabled = true;
+        parent.appendChild(option);
+        console.log("No available times for this doctor");
+        return;
+      }
 
       data.forEach((item) => {
         const option = document.createElement("option");
@@ -144,9 +221,15 @@ const loadTime = (id) => {
         option.innerText = item.name;
         parent.appendChild(option);
       });
-      console.log("Available times:", data);
+      console.log("Available times loaded:", data.length);
     })
-    .catch((err) => console.error("Available time fetch error:", err));
+    .catch((err) => {
+      console.error("Available time fetch error:", err);
+      const parent = document.getElementById("time-container");
+      if (parent) {
+        parent.innerHTML = '<option value="">Error loading times</option>';
+      }
+    });
 };
 
 const handleAppointment = () => {

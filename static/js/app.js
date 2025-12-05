@@ -1,3 +1,258 @@
+// Banner Carousel Functionality
+let currentBannerSlide = 0;
+const banners = document.querySelectorAll('.banner');
+const totalBanners = banners.length;
+let bannerAutoPlayInterval = null;
+let isBannerPlaying = true;
+
+const initBannerCarousel = () => {
+  // Check if banners exist on this page
+  const banners = document.querySelectorAll('.banner');
+  if (banners.length === 0) {
+    console.log("No banners found on this page, skipping banner carousel initialization");
+    return;
+  }
+
+  createBannerDots();
+
+  const prevBtn = document.getElementById("prevBanner");
+  const nextBtn = document.getElementById("nextBanner");
+  const playPauseBtn = document.getElementById("playPauseBanner");
+  const carouselWrapper = document.querySelector(".banner-carousel-wrapper");
+
+  if (prevBtn && nextBtn) {
+    prevBtn.addEventListener("click", () => {
+      changeBannerSlide(-1);
+      resetBannerAutoPlay();
+    });
+    nextBtn.addEventListener("click", () => {
+      changeBannerSlide(1);
+      resetBannerAutoPlay();
+    });
+  }
+
+  // Play/Pause button functionality
+  if (playPauseBtn) {
+    playPauseBtn.addEventListener("click", toggleBannerAutoPlay);
+  }
+
+  // Pause on hover
+  if (carouselWrapper) {
+    carouselWrapper.addEventListener("mouseenter", pauseBannerAutoPlay);
+    carouselWrapper.addEventListener("mouseleave", () => {
+      if (isBannerPlaying) {
+        startBannerAutoPlay();
+      }
+    });
+  }
+
+  // Start auto-play
+  startBannerAutoPlay();
+
+  // Touch/Swipe support for mobile
+  initBannerTouchSupport();
+};
+
+// Touch/Swipe Support for Banner Carousel
+const initBannerTouchSupport = () => {
+  const carouselWrapper = document.querySelector(".banner-carousel-wrapper");
+  if (!carouselWrapper) return;
+
+  let touchStartX = 0;
+  let touchEndX = 0;
+  let touchStartY = 0;
+  let touchEndY = 0;
+
+  carouselWrapper.addEventListener("touchstart", (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  carouselWrapper.addEventListener("touchend", (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    touchEndY = e.changedTouches[0].screenY;
+    handleBannerSwipe();
+  }, { passive: true });
+
+  const handleBannerSwipe = () => {
+    const swipeThreshold = 50; // Minimum distance for a swipe
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+
+    // Check if horizontal swipe is more significant than vertical
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (Math.abs(deltaX) > swipeThreshold) {
+        if (deltaX > 0) {
+          // Swipe right - go to previous slide
+          changeBannerSlide(-1);
+        } else {
+          // Swipe left - go to next slide
+          changeBannerSlide(1);
+        }
+        resetBannerAutoPlay();
+      }
+    }
+  };
+
+  // Keyboard navigation support
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") {
+      changeBannerSlide(-1);
+      resetBannerAutoPlay();
+    } else if (e.key === "ArrowRight") {
+      changeBannerSlide(1);
+      resetBannerAutoPlay();
+    }
+  });
+};
+
+const changeBannerSlide = (direction) => {
+  const banners = document.querySelectorAll('.banner');
+
+  // Safety check
+  if (banners.length === 0 || !banners[currentBannerSlide]) {
+    return;
+  }
+
+  // Remove active class from current banner
+  banners[currentBannerSlide].classList.remove('active');
+
+  // Calculate new slide index
+  currentBannerSlide += direction;
+
+  if (currentBannerSlide >= banners.length) {
+    currentBannerSlide = 0;
+  } else if (currentBannerSlide < 0) {
+    currentBannerSlide = banners.length - 1;
+  }
+
+  // Add active class to new banner
+  banners[currentBannerSlide].classList.add('active');
+  updateBannerDots();
+};
+
+const createBannerDots = () => {
+  const dotsContainer = document.getElementById("bannerDots");
+  if (!dotsContainer) return;
+
+  dotsContainer.innerHTML = '';
+  const banners = document.querySelectorAll('.banner');
+
+  banners.forEach((_, index) => {
+    const dot = document.createElement("span");
+    dot.classList.add("banner-dot");
+    if (index === 0) dot.classList.add("active");
+    dot.addEventListener("click", () => {
+      const banners = document.querySelectorAll('.banner');
+      banners[currentBannerSlide].classList.remove('active');
+      currentBannerSlide = index;
+      banners[currentBannerSlide].classList.add('active');
+      updateBannerDots();
+    });
+    dotsContainer.appendChild(dot);
+  });
+};
+
+const updateBannerDots = () => {
+  const dots = document.querySelectorAll(".banner-dot");
+  dots.forEach((dot, index) => {
+    if (index === currentBannerSlide) {
+      dot.classList.add("active");
+    } else {
+      dot.classList.remove("active");
+    }
+  });
+};
+
+// Banner Auto-Play Control Functions
+const startBannerAutoPlay = () => {
+  if (bannerAutoPlayInterval) {
+    clearInterval(bannerAutoPlayInterval);
+  }
+  bannerAutoPlayInterval = setInterval(() => {
+    changeBannerSlide(1);
+  }, 6000);
+};
+
+const pauseBannerAutoPlay = () => {
+  if (bannerAutoPlayInterval) {
+    clearInterval(bannerAutoPlayInterval);
+    bannerAutoPlayInterval = null;
+  }
+};
+
+const resetBannerAutoPlay = () => {
+  if (isBannerPlaying) {
+    pauseBannerAutoPlay();
+    startBannerAutoPlay();
+  }
+};
+
+const toggleBannerAutoPlay = () => {
+  const playPauseBtn = document.getElementById("playPauseBanner");
+  const icon = playPauseBtn.querySelector("i");
+
+  if (isBannerPlaying) {
+    // Pause
+    pauseBannerAutoPlay();
+    isBannerPlaying = false;
+    icon.classList.remove("fa-pause");
+    icon.classList.add("fa-play");
+    playPauseBtn.setAttribute("aria-label", "Play carousel");
+  } else {
+    // Play
+    startBannerAutoPlay();
+    isBannerPlaying = true;
+    icon.classList.remove("fa-play");
+    icon.classList.add("fa-pause");
+    playPauseBtn.setAttribute("aria-label", "Pause carousel");
+  }
+};
+
+// Load banner reviews
+const loadBannerReviews = () => {
+  const bannerReviews = [
+    {
+      id: 1,
+      name: "Sarah Ahmed",
+      image: "https://i.pravatar.cc/150?img=1",
+      review: "Excellent healthcare service! The doctors are very professional and caring.",
+      rating: 5
+    },
+    {
+      id: 2,
+      name: "Mohammad Rahman",
+      image: "https://i.pravatar.cc/150?img=12",
+      review: "Great experience with SmartCare. The appointment booking system is very convenient.",
+      rating: 5
+    },
+    {
+      id: 3,
+      name: "Fatima Khan",
+      image: "https://i.pravatar.cc/150?img=5",
+      review: "Very satisfied with the medical care I received. Highly recommended!",
+      rating: 4
+    }
+  ];
+
+  const reviewsGrid = document.getElementById("bannerReviewsGrid");
+  if (!reviewsGrid) return;
+
+  reviewsGrid.innerHTML = '';
+  bannerReviews.forEach((review) => {
+    const stars = generateStarRating(review.rating);
+    const reviewCard = document.createElement("div");
+    reviewCard.classList.add("banner-review-card");
+    reviewCard.innerHTML = `
+      <img src="${review.image}" alt="${review.name}" class="banner-review-img" onerror="this.src='https://i.pravatar.cc/150?img=68'" />
+      <h5 class="banner-review-name">${review.name}</h5>
+      <div class="banner-review-stars">${stars}</div>
+      <p class="banner-review-text">${review.review}</p>
+    `;
+    reviewsGrid.appendChild(reviewCard);
+  });
+};
+
 const loadServices = () => {
   // Define comprehensive services with Font Awesome icons
   const allServices = [
@@ -131,8 +386,11 @@ let totalServiceSlides = 0;
 
 const displayService = (services) => {
   const parent = document.getElementById("servicesTrack");
-  if (!parent) return;
-  
+  if (!parent) {
+    console.log("servicesTrack element not found on this page");
+    return;
+  }
+
   parent.innerHTML = ''; // Clear existing content
   
   services.forEach((service) => {
@@ -365,7 +623,7 @@ const displyDoctors = (doctors) => {
           <div class="doctor-info mb-3">
             <p class="mb-1"><i class="fas fa-hospital text-primary"></i> ${doctor?.designation[0] || 'Specialist'}</p>
           </div>
-          <button class="btn btn-primary btn-sm w-100" onclick="window.location.href='docDetails.html?doctorId=${doctor.id}'">
+          <button class="btn btn-primary btn-sm w-100" onclick="window.location.href='/docDetails.html?doctorId=${doctor.id}'">
             <i class="fas fa-calendar-check"></i> View Details
           </button>
         </div>
@@ -376,66 +634,74 @@ const displyDoctors = (doctors) => {
 };
 
 const loadDesignation = () => {
+  const parent = document.getElementById("drop-deg");
+  if (!parent) {
+    console.log("drop-deg element not found on this page");
+    return;
+  }
+
   fetch("http://127.0.0.1:8000/doctor/designation/")
     .then((res) => res.json())
     .then((data) => {
-      const parent = document.getElementById("drop-deg");
       // Clear loading text
       parent.innerHTML = '';
-      
+
       // Add "All Designations" option first
       const allLi = document.createElement("li");
       allLi.innerHTML = `<a class="dropdown-item" href="#" onclick="loadDoctors(''); return false;">All Designations</a>`;
       parent.appendChild(allLi);
-      
+
       // Add divider
       const divider = document.createElement("li");
       divider.innerHTML = `<hr class="dropdown-divider">`;
       parent.appendChild(divider);
-      
+
       data.forEach((item) => {
         const li = document.createElement("li");
         li.innerHTML = `<a class="dropdown-item" href="#" onclick="loadDoctors('${item.name}'); return false;">${item.name}</a>`;
         parent.appendChild(li);
       });
-      
+
       console.log("Designations loaded:", data.length);
     })
     .catch((err) => {
       console.log("Error loading designations:", err);
-      const parent = document.getElementById("drop-deg");
       parent.innerHTML = '<li><a class="dropdown-item" href="#">Error loading data</a></li>';
     });
 };
 const loadSpecialization = () => {
+  const parent = document.getElementById("drop-spe");
+  if (!parent) {
+    console.log("drop-spe element not found on this page");
+    return;
+  }
+
   fetch("http://127.0.0.1:8000/doctor/specialization/")
     .then((res) => res.json())
     .then((data) => {
-      const parent = document.getElementById("drop-spe");
       // Clear loading text
       parent.innerHTML = '';
-      
+
       // Add "All Specializations" option first
       const allLi = document.createElement("li");
       allLi.innerHTML = `<a class="dropdown-item" href="#" onclick="loadDoctors(''); return false;">All Specializations</a>`;
       parent.appendChild(allLi);
-      
+
       // Add divider
       const divider = document.createElement("li");
       divider.innerHTML = `<hr class="dropdown-divider">`;
       parent.appendChild(divider);
-      
+
       data.forEach((item) => {
         const li = document.createElement("li");
         li.innerHTML = `<a class="dropdown-item" href="#" onclick="loadDoctors('${item.name}'); return false;">${item.name}</a>`;
         parent.appendChild(li);
       });
-      
+
       console.log("Specializations loaded:", data.length);
     })
     .catch((err) => {
       console.log("Error loading specializations:", err);
-      const parent = document.getElementById("drop-spe");
       parent.innerHTML = '<li><a class="dropdown-item" href="#">Error loading data</a></li>';
     });
 };
@@ -457,20 +723,81 @@ if (document.getElementById("search")) {
 }
 
 const loadReview = () => {
-  fetch("http://127.0.0.1:8000/doctor/reviews/")
-    .then((res) => {
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-      return res.json();
-    })
-    .then((data) => {
-      console.log("Reviews loaded:", data);
-      displayReview(data);
-    })
-    .catch((error) => {
-      console.error("Error loading reviews:", error);
-    });
+  // Static customer reviews data
+  const customerReviews = [
+    {
+      id: 1,
+      name: "Sarah Ahmed",
+      image: "https://i.pravatar.cc/150?img=1",
+      review: "Excellent healthcare service! The doctors are very professional and caring. I received top-notch treatment for my condition. The staff was friendly and the facilities were clean and modern.",
+      rating: 5
+    },
+    {
+      id: 2,
+      name: "Mohammad Rahman",
+      image: "https://i.pravatar.cc/150?img=12",
+      review: "Great experience with SmartCare. The appointment booking system is very convenient and the doctors are highly skilled. They took time to explain my treatment plan thoroughly.",
+      rating: 5
+    },
+    {
+      id: 3,
+      name: "Fatima Khan",
+      image: "https://i.pravatar.cc/150?img=5",
+      review: "Very satisfied with the medical care I received. The doctors are knowledgeable and compassionate. The hospital is well-equipped with modern medical technology.",
+      rating: 4
+    },
+    {
+      id: 4,
+      name: "Karim Hassan",
+      image: "https://i.pravatar.cc/150?img=13",
+      review: "Outstanding medical facility! I had surgery here and the entire team was amazing. From pre-op to post-op care, everything was handled professionally. Highly recommended!",
+      rating: 5
+    },
+    {
+      id: 5,
+      name: "Ayesha Begum",
+      image: "https://i.pravatar.cc/150?img=9",
+      review: "The pediatric department is exceptional. My children received excellent care during their checkups. The doctors are patient and great with kids. Very happy with the service!",
+      rating: 5
+    },
+    {
+      id: 6,
+      name: "Tariq Islam",
+      image: "https://i.pravatar.cc/150?img=14",
+      review: "Good overall experience. The diagnostic services are fast and accurate. Wait times were reasonable and the staff was helpful throughout my visit.",
+      rating: 4
+    },
+    {
+      id: 7,
+      name: "Nadia Sultana",
+      image: "https://i.pravatar.cc/150?img=10",
+      review: "Wonderful maternity care! The obstetrics team made my pregnancy journey comfortable and safe. I'm grateful for their expertise and compassionate care during delivery.",
+      rating: 5
+    },
+    {
+      id: 8,
+      name: "Abdullah Malik",
+      image: "https://i.pravatar.cc/150?img=15",
+      review: "Impressive emergency services! When I had an accident, the emergency team responded quickly and efficiently. They provided excellent care and saved my life.",
+      rating: 5
+    },
+    {
+      id: 9,
+      name: "Zainab Ali",
+      image: "https://i.pravatar.cc/150?img=20",
+      review: "The dental department is fantastic! Professional dentists with modern equipment. My root canal treatment was painless. Great hygiene standards maintained throughout.",
+      rating: 4
+    },
+    {
+      id: 10,
+      name: "Ibrahim Hossain",
+      image: "https://i.pravatar.cc/150?img=33",
+      review: "Very professional cardiology department. The heart specialists are experienced and caring. They conducted thorough tests and provided an effective treatment plan for my condition.",
+      rating: 5
+    }
+  ];
+
+  displayReview(customerReviews);
 };
 
 const displayReview = (reviews) => {
@@ -479,28 +806,70 @@ const displayReview = (reviews) => {
     console.error("Review container not found");
     return;
   }
-  
+
   reviews.forEach((review) => {
     const li = document.createElement("li");
+
+    // Generate star rating HTML
+    const stars = generateStarRating(review.rating);
+
     li.innerHTML = `
       <div class="review-card">
-        <img src="./Images/girl.png" alt="Reviewer" />
-        <h4>${review.reviewer}</h4>
-        <p>${review.body.slice(0, 150)}...</p>
-        <h6>${review.rating}</h6>
+        <div class="review-image-wrapper">
+          <img src="${review.image}" alt="${review.name}" onerror="this.src='https://i.pravatar.cc/150?img=68'" />
+        </div>
+        <h4 class="reviewer-name">${review.name}</h4>
+        <div class="star-rating">
+          ${stars}
+        </div>
+        <p class="review-text">${review.review}</p>
       </div>
     `;
     parent.appendChild(li);
   });
-  
+
   // Reinitialize Swiffy Slider after adding reviews
-  if (window.swiffyslider) {
-    window.swiffyslider.init();
-  }
+  // Use setTimeout to ensure DOM is fully updated
+  setTimeout(() => {
+    if (window.swiffyslider && window.swiffyslider.init) {
+      const sliderElement = parent.closest('.swiffy-slider');
+      if (sliderElement) {
+        window.swiffyslider.init(sliderElement);
+      }
+    }
+  }, 100);
 };
 
-loadServices();
-loadDoctors();
-loadDesignation();
-loadSpecialization();
-loadReview();
+// Helper function to generate star rating HTML
+const generateStarRating = (rating) => {
+  let stars = '';
+  for (let i = 1; i <= 5; i++) {
+    if (i <= rating) {
+      stars += '<i class="fas fa-star"></i>';
+    } else {
+      stars += '<i class="far fa-star"></i>';
+    }
+  }
+  return stars;
+};
+
+// Wait for DOM and swiffy-slider to be fully loaded
+window.addEventListener('DOMContentLoaded', () => {
+  // Initialize banner carousel
+  initBannerCarousel();
+  // loadBannerReviews(); // Removed - banner reviews section deleted
+
+  loadServices();
+  loadDesignation();
+  loadSpecialization();
+
+  // Load doctors on doctors page only
+  if (document.getElementById("doctors")) {
+    loadDoctors();
+  }
+});
+
+// Load reviews after swiffy-slider script is loaded
+window.addEventListener('load', () => {
+  loadReview();
+});
