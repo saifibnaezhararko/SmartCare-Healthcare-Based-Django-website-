@@ -126,9 +126,10 @@
                     <li class="menu"><a href="{% url 'home' %}">Home</a></li>
                     <li class="menu"><a href="#units">Burn Units</a></li>
                     <li class="menu"><a href="#doctors">Specialists</a></li>
-                    <li class="menu"><a href="{% url 'login' %}">Login</a></li>
+                    <li class="menu"><a href="#patients">Patients</a></li>
+                    <li class="menu" id="loginMenuItem"><a href="{% url 'login' %}">Login</a></li>
                 </ul>
-                <div class="dropdown">
+                <div class="dropdown" id="profileDropdown" style="display: none;">
                     <button class="btn btn-secondary dropdown-toggle" type="button"
                             id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-user"></i> Profile
@@ -253,14 +254,110 @@
                 <!-- Burn Specialists -->
                 <div class="burn-card" id="doctors">
                     <h3><i class="fas fa-user-md text-success"></i> Burn Specialists</h3>
+                    <div class="mt-3">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="searchDoctor"
+                                   placeholder="Search by doctor name or specialization..." />
+                            <button class="btn btn-success" onclick="searchDoctors()">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="onlyAvailable" onchange="loadDoctors()">
+                            <label class="form-check-label" for="onlyAvailable">
+                                Show only available doctors
+                            </label>
+                        </div>
+                        <div class="mb-3">
+                            <label for="experienceFilter" class="form-label">Minimum years of experience:</label>
+                            <select class="form-select" id="experienceFilter" onchange="loadDoctors()">
+                                <option value="0">Any experience</option>
+                                <option value="5">5+ years</option>
+                                <option value="10">10+ years</option>
+                                <option value="15">15+ years</option>
+                                <option value="20">20+ years</option>
+                            </select>
+                        </div>
+                    </div>
                     <div id="doctorsList" class="mt-3">
                         <!-- Doctors will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Burn Patients -->
+                <div class="burn-card" id="patients">
+                    <h3><i class="fas fa-hospital-user text-primary"></i> Burn Patients</h3>
+                    <div class="mt-3">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="searchPatient"
+                                   placeholder="Search by patient name or room number..." />
+                            <button class="btn btn-primary" onclick="searchPatients()">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="severityFilter" class="form-label">Burn Severity:</label>
+                                <select class="form-select" id="severityFilter" onchange="loadPatients()">
+                                    <option value="">All Severities</option>
+                                    <option value="minor">Minor</option>
+                                    <option value="moderate">Moderate</option>
+                                    <option value="severe">Severe</option>
+                                    <option value="critical">Critical</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="statusFilter" class="form-label">Patient Status:</label>
+                                <select class="form-select" id="statusFilter" onchange="loadPatients()">
+                                    <option value="">All Statuses</option>
+                                    <option value="admitted">Admitted</option>
+                                    <option value="under_treatment">Under Treatment</option>
+                                    <option value="recovering">Recovering</option>
+                                    <option value="discharged">Discharged</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="patientsList" class="mt-3">
+                        <!-- Patients will be loaded here -->
                     </div>
                 </div>
 
                 <!-- My Treatments (for logged-in patients) -->
                 <div class="burn-card" id="my-treatments">
                     <h3><i class="fas fa-notes-medical text-info"></i> My Treatment Records</h3>
+                    <div class="mt-3">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="searchTreatment"
+                                   placeholder="Search by treatment type or doctor name..." />
+                            <button class="btn btn-info" onclick="searchTreatments()">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="treatmentTypeFilter" class="form-label">Treatment Type:</label>
+                                <select class="form-select" id="treatmentTypeFilter" onchange="loadMyTreatments()">
+                                    <option value="">All Types</option>
+                                    <option value="wound_dressing">Wound Dressing</option>
+                                    <option value="debridement">Debridement</option>
+                                    <option value="skin_graft">Skin Graft</option>
+                                    <option value="physiotherapy">Physiotherapy</option>
+                                    <option value="medication">Medication</option>
+                                    <option value="surgery">Surgery</option>
+                                    <option value="consultation">Consultation</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="treatmentDateSort" class="form-label">Sort By Date:</label>
+                                <select class="form-select" id="treatmentDateSort" onchange="loadMyTreatments()">
+                                    <option value="desc">Newest First</option>
+                                    <option value="asc">Oldest First</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                     <div id="treatmentsList" class="mt-3">
                         <!-- Treatments will be loaded here -->
                     </div>
@@ -365,22 +462,43 @@
         // Get token from localStorage
         const getToken = () => localStorage.getItem('token');
 
+        // Check authentication and update navigation
+        function updateNavigation() {
+            const token = getToken();
+            const loginMenuItem = document.getElementById('loginMenuItem');
+            const profileDropdown = document.getElementById('profileDropdown');
+
+            if (token) {
+                // User is logged in - hide login button, show profile dropdown
+                if (loginMenuItem) loginMenuItem.style.display = 'none';
+                if (profileDropdown) profileDropdown.style.display = 'block';
+            } else {
+                // User is not logged in - show login button, hide profile dropdown
+                if (loginMenuItem) loginMenuItem.style.display = 'block';
+                if (profileDropdown) profileDropdown.style.display = 'none';
+            }
+        }
+
         // Load statistics
         async function loadStatistics() {
             try {
                 // Load total units
                 const unitsResponse = await fetch(`${API_BASE_URL}/burn_unit/api/units/`);
-                const unitsData = await unitsResponse.json();
-                document.getElementById('totalUnits').textContent = unitsData.length;
+                if (unitsResponse.ok) {
+                    const unitsData = await unitsResponse.json();
+                    document.getElementById('totalUnits').textContent = unitsData.length || 0;
 
-                // Calculate available beds
-                const availableBeds = unitsData.reduce((sum, unit) => sum + (unit.available_beds || 0), 0);
-                document.getElementById('availableBeds').textContent = availableBeds;
+                    // Calculate available beds
+                    const availableBeds = unitsData.reduce((sum, unit) => sum + (unit.available_beds || 0), 0);
+                    document.getElementById('availableBeds').textContent = availableBeds;
+                }
 
                 // Load total doctors
                 const doctorsResponse = await fetch(`${API_BASE_URL}/burn_unit/api/doctors/`);
-                const doctorsData = await doctorsResponse.json();
-                document.getElementById('totalDoctors').textContent = doctorsData.length;
+                if (doctorsResponse.ok) {
+                    const doctorsData = await doctorsResponse.json();
+                    document.getElementById('totalDoctors').textContent = doctorsData.length || 0;
+                }
 
                 // Load total patients (requires authentication)
                 const token = getToken();
@@ -392,16 +510,21 @@
                     });
                     if (patientsResponse.ok) {
                         const patientsData = await patientsResponse.json();
-                        document.getElementById('totalPatients').textContent = patientsData.length;
+                        document.getElementById('totalPatients').textContent = patientsData.length || 0;
                     }
                 }
             } catch (error) {
                 console.error('Error loading statistics:', error);
+                // Show user-friendly message
+                document.getElementById('totalUnits').textContent = '-';
+                document.getElementById('availableBeds').textContent = '-';
+                document.getElementById('totalDoctors').textContent = '-';
             }
         }
 
         // Load burn units
         async function loadUnits() {
+            const unitsList = document.getElementById('unitsList');
             try {
                 let url = `${API_BASE_URL}/burn_unit/api/units/`;
                 const params = new URLSearchParams();
@@ -418,11 +541,15 @@
                 }
 
                 const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const data = await response.json();
 
-                const unitsList = document.getElementById('unitsList');
                 if (data.length === 0) {
-                    unitsList.innerHTML = '<p class="text-muted">No burn units found</p>';
+                    unitsList.innerHTML = '<p class="text-muted">No burn units found matching your criteria</p>';
                     return;
                 }
 
@@ -433,7 +560,9 @@
                                 <h5><i class="fas fa-hospital"></i> ${unit.name}</h5>
                                 <p class="mb-1"><strong>Hospital:</strong> ${unit.hospital_name}</p>
                                 <p class="mb-1"><strong>Location:</strong> ${unit.address}, ${unit.city}</p>
-                                <p class="mb-1"><strong>Phone:</strong> ${unit.phone}</p>
+                                <p class="mb-1"><i class="fas fa-phone"></i> <strong>Phone:</strong> ${unit.phone}</p>
+                                <p class="mb-1"><i class="fas fa-phone-alt"></i> <strong>Emergency:</strong> ${unit.emergency_contact}</p>
+                                ${unit.email ? `<p class="mb-1"><i class="fas fa-envelope"></i> <strong>Email:</strong> ${unit.email}</p>` : ''}
                                 <p class="mb-1">
                                     <i class="fas fa-bed"></i> <strong>Available Beds:</strong>
                                     <span class="badge ${unit.available_beds > 0 ? 'bg-success' : 'bg-danger'}">
@@ -441,15 +570,18 @@
                                     </span>
                                 </p>
                                 <div class="mt-2">
-                                    ${unit.is_24x7 ? '<span class="badge bg-success me-1">24/7</span>' : ''}
-                                    ${unit.has_icu ? '<span class="badge bg-primary me-1">ICU Available</span>' : ''}
+                                    ${unit.is_24x7 ? '<span class="badge bg-success me-1"><i class="fas fa-clock"></i> 24/7</span>' : ''}
+                                    ${unit.has_icu ? '<span class="badge bg-primary me-1"><i class="fas fa-heartbeat"></i> ICU Available</span>' : ''}
+                                    ${unit.has_operation_theater ? '<span class="badge bg-info me-1"><i class="fas fa-procedures"></i> OT Available</span>' : ''}
                                 </div>
+                                ${unit.facilities ? `<p class="mt-2 mb-0"><small><strong>Facilities:</strong> ${unit.facilities}</small></p>` : ''}
                             </div>
                         </div>
                     </div>
                 `).join('');
             } catch (error) {
                 console.error('Error loading units:', error);
+                unitsList.innerHTML = '<div class="alert alert-danger">Failed to load burn units. Please try again later.</div>';
             }
         }
 
@@ -466,39 +598,250 @@
 
         // Load burn specialists
         async function loadDoctors() {
+            const doctorsList = document.getElementById('doctorsList');
             try {
                 const response = await fetch(`${API_BASE_URL}/burn_unit/api/doctors/`);
-                const data = await response.json();
 
-                const doctorsList = document.getElementById('doctorsList');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                let data = await response.json();
+
+                // Apply filters
+                const onlyAvailable = document.getElementById('onlyAvailable').checked;
+                const minExperience = parseInt(document.getElementById('experienceFilter').value);
+
+                if (onlyAvailable) {
+                    data = data.filter(doctor => doctor.is_available);
+                }
+
+                if (minExperience > 0) {
+                    data = data.filter(doctor => (doctor.years_of_experience || 0) >= minExperience);
+                }
+
                 if (data.length === 0) {
-                    doctorsList.innerHTML = '<p class="text-muted">No specialists available</p>';
+                    doctorsList.innerHTML = '<p class="text-muted">No specialists found matching your criteria</p>';
                     return;
                 }
 
-                doctorsList.innerHTML = data.map(doctor => `
-                    <div class="doctor-card">
-                        <h6><i class="fas fa-user-md text-success"></i> ${doctor.doctor_name || 'Dr. ' + doctor.doctor}</h6>
-                        <p class="mb-1"><strong>Specialization:</strong> ${doctor.specialization || 'Burn Care Specialist'}</p>
-                        <p class="mb-1"><strong>Experience:</strong> ${doctor.years_of_experience || 'N/A'} years</p>
-                        <p class="mb-0">
-                            <span class="badge ${doctor.is_available ? 'bg-success' : 'bg-secondary'}">
-                                ${doctor.is_available ? 'Available' : 'Not Available'}
-                            </span>
-                        </p>
-                    </div>
-                `).join('');
+                doctorsList.innerHTML = data.map(doctor => {
+                    // Get doctor name from nested structure
+                    let doctorName = 'Dr. Unknown';
+                    if (doctor.doctor_details && doctor.doctor_details.user) {
+                        const user = doctor.doctor_details.user;
+                        doctorName = `Dr. ${user.first_name} ${user.last_name}`.trim();
+                        if (doctorName === 'Dr.') {
+                            doctorName = user.username || 'Dr. Unknown';
+                        }
+                    }
+
+                    return `
+                        <div class="doctor-card" data-doctor-name="${doctorName.toLowerCase()}" data-specialization="${(doctor.specialization || '').toLowerCase()}">
+                            <h6><i class="fas fa-user-md text-success"></i> ${doctorName}</h6>
+                            <p class="mb-1"><strong>Specialization:</strong> ${doctor.specialization || 'Burn Care Specialist'}</p>
+                            <p class="mb-1"><strong>Experience:</strong> ${doctor.years_of_experience || 'N/A'} years</p>
+                            ${doctor.certifications ? `<p class="mb-1"><strong>Certifications:</strong> ${doctor.certifications}</p>` : ''}
+                            <p class="mb-0">
+                                <span class="badge ${doctor.is_available ? 'bg-success' : 'bg-secondary'}">
+                                    ${doctor.is_available ? 'Available' : 'Not Available'}
+                                </span>
+                            </p>
+                        </div>
+                    `;
+                }).join('');
             } catch (error) {
                 console.error('Error loading doctors:', error);
+                doctorsList.innerHTML = '<div class="alert alert-danger">Failed to load specialists. Please try again later.</div>';
+            }
+        }
+
+        // Search doctors by name or specialization
+        function searchDoctors() {
+            const searchTerm = document.getElementById('searchDoctor').value.toLowerCase();
+            const doctorCards = document.querySelectorAll('.doctor-card');
+
+            let visibleCount = 0;
+            doctorCards.forEach(card => {
+                const doctorName = card.getAttribute('data-doctor-name') || '';
+                const specialization = card.getAttribute('data-specialization') || '';
+
+                if (doctorName.includes(searchTerm) || specialization.includes(searchTerm)) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Show message if no results found
+            const doctorsList = document.getElementById('doctorsList');
+            if (visibleCount === 0 && doctorCards.length > 0) {
+                const existingMessage = doctorsList.querySelector('.no-results-message');
+                if (!existingMessage) {
+                    const message = document.createElement('p');
+                    message.className = 'text-muted no-results-message';
+                    message.textContent = 'No doctors found matching your search';
+                    doctorsList.appendChild(message);
+                }
+            } else {
+                const existingMessage = doctorsList.querySelector('.no-results-message');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
+            }
+        }
+
+        // Load burn patients
+        async function loadPatients() {
+            const patientsList = document.getElementById('patientsList');
+            const token = getToken();
+
+            if (!token) {
+                patientsList.innerHTML =
+                    '<div class="alert alert-info"><i class="fas fa-info-circle"></i> Please login to view burn patients</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/burn_unit/api/patients/`, {
+                    headers: {
+                        'Authorization': `Token ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        patientsList.innerHTML =
+                            '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Please login to view patients</div>';
+                    } else {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return;
+                }
+
+                let data = await response.json();
+
+                // Apply filters
+                const severityFilter = document.getElementById('severityFilter').value;
+                const statusFilter = document.getElementById('statusFilter').value;
+
+                if (severityFilter) {
+                    data = data.filter(patient => patient.burn_severity === severityFilter);
+                }
+
+                if (statusFilter) {
+                    data = data.filter(patient => patient.status === statusFilter);
+                }
+
+                if (data.length === 0) {
+                    patientsList.innerHTML = '<p class="text-muted">No patients found matching your criteria</p>';
+                    return;
+                }
+
+                patientsList.innerHTML = data.map(patient => {
+                    // Get patient name from nested structure
+                    let patientName = 'Unknown Patient';
+                    if (patient.patient_details && patient.patient_details.user) {
+                        const user = patient.patient_details.user;
+                        patientName = `${user.first_name} ${user.last_name}`.trim();
+                        if (patientName === '') {
+                            patientName = user.username || 'Unknown Patient';
+                        }
+                    }
+
+                    // Get doctor name
+                    let doctorName = 'Not Assigned';
+                    if (patient.assigned_doctor_details && patient.assigned_doctor_details.doctor_details && patient.assigned_doctor_details.doctor_details.user) {
+                        const user = patient.assigned_doctor_details.doctor_details.user;
+                        doctorName = `Dr. ${user.first_name} ${user.last_name}`.trim();
+                        if (doctorName === 'Dr.') {
+                            doctorName = user.username || 'Not Assigned';
+                        }
+                    }
+
+                    // Determine severity badge class
+                    const severityClass = `severity-${patient.burn_severity}`;
+
+                    // Determine status badge class
+                    const statusClass = `status-${patient.status.replace('_', '-')}`;
+
+                    return `
+                        <div class="unit-card patient-card"
+                             data-patient-name="${patientName.toLowerCase()}"
+                             data-room="${patient.room_number || ''}"
+                             data-severity="${patient.burn_severity}"
+                             data-status="${patient.status}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6><i class="fas fa-user-injured"></i> ${patientName}</h6>
+                                    <p class="mb-1"><strong>Room:</strong> ${patient.room_number || 'N/A'}</p>
+                                    <p class="mb-1"><strong>Admission Date:</strong> ${patient.admission_date ? new Date(patient.admission_date).toLocaleDateString() : 'N/A'}</p>
+                                    <p class="mb-1"><strong>Assigned Doctor:</strong> ${doctorName}</p>
+                                    <div class="mt-2">
+                                        <span class="severity-badge ${severityClass}">
+                                            ${patient.burn_severity ? patient.burn_severity.charAt(0).toUpperCase() + patient.burn_severity.slice(1) : 'N/A'}
+                                        </span>
+                                        <span class="status-badge ${statusClass} ms-2">
+                                            ${patient.status ? patient.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'N/A'}
+                                        </span>
+                                    </div>
+                                    ${patient.medical_notes ? `<p class="mt-2 mb-0"><small><strong>Notes:</strong> ${patient.medical_notes}</small></p>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading patients:', error);
+                patientsList.innerHTML = '<div class="alert alert-danger">Failed to load patients. Please try again later.</div>';
+            }
+        }
+
+        // Search patients by name or room number
+        function searchPatients() {
+            const searchTerm = document.getElementById('searchPatient').value.toLowerCase();
+            const patientCards = document.querySelectorAll('.patient-card');
+
+            let visibleCount = 0;
+            patientCards.forEach(card => {
+                const patientName = card.getAttribute('data-patient-name') || '';
+                const roomNumber = card.getAttribute('data-room') || '';
+
+                if (patientName.includes(searchTerm) || roomNumber.includes(searchTerm)) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Show message if no results found
+            const patientsList = document.getElementById('patientsList');
+            if (visibleCount === 0 && patientCards.length > 0) {
+                const existingMessage = patientsList.querySelector('.no-results-message');
+                if (!existingMessage) {
+                    const message = document.createElement('p');
+                    message.className = 'text-muted no-results-message';
+                    message.textContent = 'No patients found matching your search';
+                    patientsList.appendChild(message);
+                }
+            } else {
+                const existingMessage = patientsList.querySelector('.no-results-message');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
             }
         }
 
         // Load patient's treatment records
         async function loadMyTreatments() {
+            const treatmentsList = document.getElementById('treatmentsList');
             const token = getToken();
+
             if (!token) {
-                document.getElementById('treatmentsList').innerHTML =
-                    '<p class="text-muted">Please login to view your treatment records</p>';
+                treatmentsList.innerHTML =
+                    '<div class="alert alert-info"><i class="fas fa-info-circle"></i> Please login to view your treatment records</div>';
                 return;
             }
 
@@ -510,39 +853,116 @@
                 });
 
                 if (!response.ok) {
-                    document.getElementById('treatmentsList').innerHTML =
-                        '<p class="text-muted">Please login to view your treatment records</p>';
+                    if (response.status === 401) {
+                        treatmentsList.innerHTML =
+                            '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Please login to view your treatment records</div>';
+                    } else {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
                     return;
                 }
 
-                const data = await response.json();
-                const treatmentsList = document.getElementById('treatmentsList');
+                let data = await response.json();
+
+                // Apply treatment type filter
+                const treatmentTypeFilter = document.getElementById('treatmentTypeFilter');
+                if (treatmentTypeFilter && treatmentTypeFilter.value) {
+                    data = data.filter(treatment =>
+                        treatment.treatment_type &&
+                        treatment.treatment_type.toLowerCase().replace(/\s+/g, '_') === treatmentTypeFilter.value
+                    );
+                }
+
+                // Apply date sorting
+                const dateSort = document.getElementById('treatmentDateSort');
+                if (dateSort && dateSort.value) {
+                    data.sort((a, b) => {
+                        const dateA = new Date(a.treatment_date);
+                        const dateB = new Date(b.treatment_date);
+                        return dateSort.value === 'asc' ? dateA - dateB : dateB - dateA;
+                    });
+                }
 
                 if (data.length === 0) {
                     treatmentsList.innerHTML = '<p class="text-muted">No treatment records found</p>';
                     return;
                 }
 
-                treatmentsList.innerHTML = data.map(treatment => `
-                    <div class="burn-card">
-                        <h6><i class="fas fa-notes-medical text-info"></i> Treatment Details</h6>
-                        <p class="mb-1"><strong>Date:</strong> ${new Date(treatment.treatment_date).toLocaleDateString()}</p>
-                        <p class="mb-1"><strong>Treatment Type:</strong> ${treatment.treatment_type || 'N/A'}</p>
-                        <p class="mb-1"><strong>Description:</strong> ${treatment.description || 'N/A'}</p>
-                        <p class="mb-1"><strong>Performed By:</strong> ${treatment.performed_by_name || 'N/A'}</p>
-                        ${treatment.notes ? `<p class="mb-0"><small class="text-muted">${treatment.notes}</small></p>` : ''}
-                    </div>
-                `).join('');
+                treatmentsList.innerHTML = data.map(treatment => {
+                    // Get doctor name
+                    let doctorName = 'N/A';
+                    if (treatment.doctor_name) {
+                        doctorName = treatment.doctor_name;
+                    } else if (treatment.performed_by_details && treatment.performed_by_details.doctor_details && treatment.performed_by_details.doctor_details.user) {
+                        const user = treatment.performed_by_details.doctor_details.user;
+                        doctorName = `Dr. ${user.first_name} ${user.last_name}`.trim();
+                        if (doctorName === 'Dr.') {
+                            doctorName = user.username || 'N/A';
+                        }
+                    }
+
+                    return `
+                        <div class="burn-card treatment-card"
+                             data-treatment-type="${(treatment.treatment_type || '').toLowerCase()}"
+                             data-doctor-name="${doctorName.toLowerCase()}">
+                            <h6><i class="fas fa-notes-medical text-info"></i> Treatment Details</h6>
+                            <p class="mb-1"><strong>Date:</strong> ${new Date(treatment.treatment_date).toLocaleDateString()}</p>
+                            <p class="mb-1"><strong>Treatment Type:</strong> ${treatment.treatment_type || 'N/A'}</p>
+                            <p class="mb-1"><strong>Medications:</strong> ${treatment.medications || 'N/A'}</p>
+                            <p class="mb-1"><strong>Performed By:</strong> ${doctorName}</p>
+                            ${treatment.notes ? `<p class="mb-0"><strong>Notes:</strong> <small class="text-muted">${treatment.notes}</small></p>` : ''}
+                        </div>
+                    `;
+                }).join('');
             } catch (error) {
                 console.error('Error loading treatments:', error);
+                treatmentsList.innerHTML = '<div class="alert alert-danger">Failed to load treatment records. Please try again later.</div>';
+            }
+        }
+
+        // Search treatments by treatment type or doctor name
+        function searchTreatments() {
+            const searchTerm = document.getElementById('searchTreatment').value.toLowerCase();
+            const treatmentCards = document.querySelectorAll('.treatment-card');
+
+            let visibleCount = 0;
+            treatmentCards.forEach(card => {
+                const treatmentType = card.getAttribute('data-treatment-type') || '';
+                const doctorName = card.getAttribute('data-doctor-name') || '';
+
+                if (treatmentType.includes(searchTerm) || doctorName.includes(searchTerm)) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Show message if no results found
+            const treatmentsList = document.getElementById('treatmentsList');
+            if (visibleCount === 0 && treatmentCards.length > 0) {
+                const existingMessage = treatmentsList.querySelector('.no-results-message');
+                if (!existingMessage) {
+                    const message = document.createElement('p');
+                    message.className = 'text-muted no-results-message';
+                    message.textContent = 'No treatments found matching your search';
+                    treatmentsList.appendChild(message);
+                }
+            } else {
+                const existingMessage = treatmentsList.querySelector('.no-results-message');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
             }
         }
 
         // Load all data on page load
         document.addEventListener('DOMContentLoaded', () => {
+            updateNavigation();
             loadStatistics();
             loadUnits();
             loadDoctors();
+            loadPatients();
             loadMyTreatments();
         });
     </script>
